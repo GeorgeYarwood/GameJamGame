@@ -8,6 +8,8 @@ public class Player : MonoBehaviour
     //Text we show the player's current health on
     public Text HealthTxt;
 
+    public AudioSource WinAudio;
+
     public GameObject DeathPnl;
 
     //The Players current health
@@ -63,6 +65,7 @@ public class Player : MonoBehaviour
                 if (Input.GetKeyDown("f"))
                 {
                     Debug.Log("Picked up artifact");
+                    WinAudio.Play();
                 };
             }
 
