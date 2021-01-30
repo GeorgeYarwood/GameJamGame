@@ -64,20 +64,25 @@ public class Enemy : MonoBehaviour
     //Update is called once per frame
     void Update()
     {
-      
+
 
         //Distance between enemy and the player
         float distance = Vector3.Distance(CurrPlayer.transform.position, transform.position);
 
 
-        switch (currState) 
+        switch (currState)
         {
             case States.Idle:
 
                 //Set target to current position to stop movement
                 agent.destination = transform.position;
 
-                detectionPercent -= 0.03f;
+                if (!(detectionPercent <= 0))
+                {
+                    detectionPercent -= 0.03f;
+
+                }
+
 
                 //If we're close enough to the player
                 if (distance <= attackdist)
@@ -95,13 +100,17 @@ public class Enemy : MonoBehaviour
                 break;
 
             case States.Walking:
-                detectionPercent -= 0.01f;
+
+                if (!(detectionPercent <= 0))
+                {
+                    detectionPercent -= 0.01f;
+                }
 
                 if (distance <= approachdist)
                 {
-                    Vector3 target = new Vector3(CurrPlayer.transform.position.x - 4f, CurrPlayer.transform.position.y, CurrPlayer.transform.position.z);
+                    //Vector3 target = new Vector3(CurrPlayer.transform.position.x - 4f, CurrPlayer.transform.position.y, CurrPlayer.transform.position.z);
                     //Young AI go for it
-                    agent.destination = target;
+                    agent.destination = CurrPlayer.transform.position;
                 }
 
 
@@ -135,30 +144,40 @@ public class Enemy : MonoBehaviour
                 }
 
                 //Debug.Log(angle);
-                //If the player can be seen by the enemy
+
+
+
+                //If the player is within the enemies cone of vision
                 if (angle < visibilitycone)
                 {
-                
-                    Debug.Log("Enemy can see player!");
-
-                    //Start adding onto the detection percent
-                    detectionPercent += 0.05f;
-
-                    if (detectionPercent >= 100f)
+                    Ray ray = new Ray(transform.position, transform.forward);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, 10f))
                     {
-                        //Take away damage from the players health
-                        Player.DmgPlayer(dmg);
+
+                        //If our ray isn't blocked (Player is not hiding behind something)
+                        if (hit.transform.tag == "Player")
+                        {
+                            Debug.Log("Enemy can see player!");
+
+                            //Start adding onto the detection percent
+                            detectionPercent += 0.05f;
+
+                            if (detectionPercent >= 100f)
+                            {
+                                //Take away damage from the players health
+                                Player.DmgPlayer(dmg);
+                            }
+                        }
                     }
+                   
 
                 }
                 break;
 
         }
 
-
-
-
-        Player.stealthslider.value = detectionPercent;
+                Player.stealthslider.value = detectionPercent;
 
 
 
@@ -166,17 +185,17 @@ public class Enemy : MonoBehaviour
 
 
 
-        //Make our agent face the target   
-        void FaceTarget()
-        {
-            Vector3 direction = (CurrPlayer.transform.position - transform.position).normalized;
-            Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+                //Make our agent face the target   
+                void FaceTarget()
+                {
+                    Vector3 direction = (CurrPlayer.transform.position - transform.position).normalized;
+                    Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                    transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+                }
+
+
+
         }
 
-       
-           
     }
 
-  
-}
