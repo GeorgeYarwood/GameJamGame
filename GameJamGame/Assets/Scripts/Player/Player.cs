@@ -19,12 +19,14 @@ public class Player : MonoBehaviour
     //The gameobject that we resapwn to
     public GameObject RespawnLoc;
 
-    
+    public static Slider stealthslider;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        PlayerHealth = BaseHealth;
+
+        stealthslider = GameObject.FindObjectOfType<Slider>();
     }
 
     public static void DmgPlayer(float amount) 
@@ -49,7 +51,7 @@ public class Player : MonoBehaviour
     {
         Ray ray = new Ray(transform.position, transform.forward);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, 20f))
+        if (Physics.Raycast(ray, out hit, 5f))
         {
             if (hit.transform.tag == "Artifact")
             {
@@ -64,7 +66,8 @@ public class Player : MonoBehaviour
 
         }
 
-
+        //Update text showing health
+        HealthTxt.text = "Health " + Mathf.Floor(PlayerHealth).ToString();
 
         if (PlayerHealth <= 0f) 
         {

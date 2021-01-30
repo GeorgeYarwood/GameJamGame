@@ -3,19 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
     float visibilitycone = 20f;
 
-    float attackdist = 20f;
+    float attackdist = 5f;
     float approachdist = 30f;
 
-    float dmg = 10f;
+    float dmg = 0.05f;
 
     GameObject CurrPlayer;
 
+    //True when player has been seen by enemy
+    bool detected;
 
+
+  
+
+    float detectionPercent = 0;
 
     //Stuff for the AI
     NavMeshAgent agent;
@@ -57,6 +64,7 @@ public class Enemy : MonoBehaviour
     //Update is called once per frame
     void Update()
     {
+      
 
         //Distance between enemy and the player
         float distance = Vector3.Distance(CurrPlayer.transform.position, transform.position);
@@ -65,6 +73,11 @@ public class Enemy : MonoBehaviour
         switch (currState) 
         {
             case States.Idle:
+
+                //Set target to current position to stop movement
+                agent.destination = transform.position;
+
+                detectionPercent -= 0.03f;
 
                 //If we're close enough to the player
                 if (distance <= attackdist)
@@ -82,6 +95,7 @@ public class Enemy : MonoBehaviour
                 break;
 
             case States.Walking:
+                detectionPercent -= 0.01f;
 
                 if (distance <= approachdist)
                 {
@@ -108,6 +122,9 @@ public class Enemy : MonoBehaviour
             case States.Attacking:
                 FaceTarget();
 
+                //Set target to current position to stop movement
+                agent.destination = transform.position;
+
                 Vector3 targetDir = CurrPlayer.transform.position - transform.position;
                 float angle = Vector3.Angle(targetDir, transform.forward);
 
@@ -121,9 +138,18 @@ public class Enemy : MonoBehaviour
                 //If the player can be seen by the enemy
                 if (angle < visibilitycone)
                 {
-                    //Take away damage from the players health
-                    Player.DmgPlayer(dmg);
+                
                     Debug.Log("Enemy can see player!");
+
+                    //Start adding onto the detection percent
+                    detectionPercent += 0.05f;
+
+                    if (detectionPercent >= 100f)
+                    {
+                        //Take away damage from the players health
+                        Player.DmgPlayer(dmg);
+                    }
+
                 }
                 break;
 
@@ -132,8 +158,7 @@ public class Enemy : MonoBehaviour
 
 
 
-
-
+        Player.stealthslider.value = detectionPercent;
 
 
 
