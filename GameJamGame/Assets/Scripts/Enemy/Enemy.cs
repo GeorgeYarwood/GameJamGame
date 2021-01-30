@@ -10,14 +10,11 @@ public class Enemy : MonoBehaviour
     float visibilitycone = 20f;
 
     float attackdist = 5f;
-    float approachdist = 30f;
+    float approachdist = 10f;
 
     float dmg = 0.05f;
 
     GameObject CurrPlayer;
-
-    //True when player has been seen by enemy
-    bool detected;
 
 
   

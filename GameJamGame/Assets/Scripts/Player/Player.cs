@@ -24,11 +24,13 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        PlayerHealth = BaseHealth;
 
         stealthslider = GameObject.FindObjectOfType<Slider>();
     }
-
+    private void Awake()
+    {
+        PlayerHealth = BaseHealth;
+    }
     public static void DmgPlayer(float amount) 
     {
         //Take damage from player's health
