@@ -23,6 +23,8 @@ public class Player : MonoBehaviour
 
     public static Slider stealthslider;
 
+    public static float detectionPercent = 0;
+
     // Start is called before the first frame update
     void Start()
     {

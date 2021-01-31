@@ -7,19 +7,22 @@ using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    float visibilitycone = 20f;
+    float visibilitycone = 30f;
 
-    float attackdist = 5f;
+    float attackdist = 3f;
     float approachdist = 10f;
 
     float dmg = 0.05f;
 
     GameObject CurrPlayer;
 
+    public GameObject Goal1;
+    public GameObject Goal2;
 
-  
 
-    float detectionPercent = 0;
+    Animator anim;
+
+    bool walking;
 
     //Stuff for the AI
     NavMeshAgent agent;
@@ -37,7 +40,9 @@ public class Enemy : MonoBehaviour
         //Set up navmesh
         agent = GetComponent<NavMeshAgent>();
 
+        anim = GetComponentInChildren<Animator>();
 
+        walking = false;
 
         //Start off as idle
         currState = States.Idle;
@@ -58,6 +63,14 @@ public class Enemy : MonoBehaviour
         Gizmos.DrawRay(transform.position, rightRayDirection * rayRange);
     }
 
+    IEnumerator patrolWalk() 
+    {
+        walking = true;
+        yield return new WaitForSeconds(5f);
+        walking = false;
+    }
+
+
     //Update is called once per frame
     void Update()
     {
@@ -70,13 +83,38 @@ public class Enemy : MonoBehaviour
         switch (currState)
         {
             case States.Idle:
+                anim.SetTrigger("Idle");
 
                 //Set target to current position to stop movement
-                agent.destination = transform.position;
+                //agent.destination = transform.position;
 
-                if (!(detectionPercent <= 0))
+                //Distance between us and goal 1
+                float goal1dist = Vector3.Distance(transform.position, Goal1.transform.position);
+                //Distance between us and goal 2
+                float goal2dist = Vector3.Distance(transform.position, Goal2.transform.position);
+
+               
+
+                if (!walking) 
                 {
-                    detectionPercent -= 0.03f;
+
+                    anim.SetTrigger("Walk");
+                    if (goal1dist < goal2dist)
+                    {
+                        agent.destination = Goal2.transform.position;
+                    }
+                    else if (goal2dist < goal1dist)
+                    {
+                        agent.destination = Goal1.transform.position;
+
+                    }
+                    StartCoroutine(patrolWalk());
+                }
+               
+
+                if (!(Player.detectionPercent <= 0))
+                {
+                    Player.detectionPercent -= 0.03f;
 
                 }
 
@@ -97,10 +135,11 @@ public class Enemy : MonoBehaviour
                 break;
 
             case States.Walking:
+                anim.SetTrigger("Walk");
 
-                if (!(detectionPercent <= 0))
+                if (!(Player.detectionPercent <= 0))
                 {
-                    detectionPercent -= 0.01f;
+                    Player.detectionPercent -= 0.01f;
                 }
 
                 if (distance <= approachdist)
@@ -127,7 +166,7 @@ public class Enemy : MonoBehaviour
 
             case States.Attacking:
                 FaceTarget();
-
+                //anim.SetTrigger("Attack");
                 //Set target to current position to stop movement
                 agent.destination = transform.position;
 
@@ -158,9 +197,9 @@ public class Enemy : MonoBehaviour
                             Debug.Log("Enemy can see player!");
 
                             //Start adding onto the detection percent
-                            detectionPercent += 0.05f;
+                            Player.detectionPercent += 0.2f;
 
-                            if (detectionPercent >= 100f)
+                            if (Player.detectionPercent >= 100f)
                             {
                                 //Take away damage from the players health
                                 Player.DmgPlayer(dmg);
@@ -174,7 +213,7 @@ public class Enemy : MonoBehaviour
 
         }
 
-                Player.stealthslider.value = detectionPercent;
+                Player.stealthslider.value = Player.detectionPercent;
 
 
 
